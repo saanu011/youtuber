@@ -22,6 +22,7 @@ var ResourceData []domain.Resource
 func (j *RefreshDataJob) HandleRefreshDataTask(ctx context.Context, t *asynq.Task) error {
 	var p domain.ResourceQuery = domain.ResourceQuery{
 		ResourceType: "video",
+		Query:        "football",
 	}
 
 	response, err := j.resourceService.GetResourcesList(ctx, p)

@@ -43,5 +43,4 @@ func (h *Handler) GetVideoListByParams(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.JSON(w, http.StatusOK, res)
-
 }

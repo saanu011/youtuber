@@ -10,7 +10,7 @@ import (
 )
 
 type APIResponder interface {
-	MaskCustomerNumber(ctx context.Context, req SearchResourceList) ([]ResourceListResponse, error)
+	Search(ctx context.Context, req SearchResourceList) (*ResourceListResponse, error)
 }
 
 type APIClient struct {
@@ -25,18 +25,19 @@ func NewAPIClient(cfg Config) *APIClient {
 	}
 }
 
-func (c *APIClient) MaskCustomerNumber(ctx context.Context, numberMaskingRequest SearchResourceList) ([]ResourceListResponse, error) {
+func (c *APIClient) Search(ctx context.Context, request SearchResourceList) (*ResourceListResponse, error) {
 
-	response := []ResourceListResponse{}
+	response := &ResourceListResponse{}
 
 	query := url.Values{}
-	query.Add("order", numberMaskingRequest.OrderBy)
-	query.Add("publishedAfter", numberMaskingRequest.PublishedAfter)
-	query.Add("q", numberMaskingRequest.Query)
-	query.Add("type", numberMaskingRequest.ResourceType)
+	query.Add("order", request.OrderBy)
+	query.Add("publishedAfter", request.PublishedAfter)
+	query.Add("q", request.Query)
+	query.Add("type", request.ResourceType)
 	query.Add("part", "snippet")
+	query.Add("key", c.config.AuthKey)
 
-	req := httpClient.NewRequest(ctx, http.MethodGet, fmt.Sprintf("%s/youtube/v3/docs/search/list", c.config.Host), nil, &response).
+	req := httpClient.NewRequest(ctx, http.MethodGet, fmt.Sprintf("%s/youtube/v3/search", c.config.Host), nil, &response).
 		WithQuery(query)
 
 	err := c.httpClient.Do(req)

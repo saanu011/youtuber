@@ -26,3 +26,6 @@ REDIS:
   ADDRESS: "localhost:6379"
   USER: default
   PASSWORD: ''
+YOUTUBE:
+  HOST: "https://youtube.googleapis.com"
+  AUTHKEY: replace-with-auth-key

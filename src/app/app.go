@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"youtuber/pkg/server"
 	"youtuber/pkg/worker"
 	"youtuber/src/resource/job"
@@ -19,9 +20,11 @@ func NewApp(config *config.Config) (*App, error) {
 		return nil, err
 	}
 
-	router := NewRouter(config, deps)
+	fmt.Println(config.Resource.Host, config.Resource)
 
-	httpServer := server.New(config.Server, router)
+	serverRouter := NewRouter(config, deps)
+
+	httpServer := server.New(config.Server, serverRouter)
 
 	workerRouter := NewWorkerRouter(config, deps)
 	work := worker.New(config.Worker, workerRouter)

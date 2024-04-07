@@ -25,7 +25,7 @@ func (s service) GetResourcesList(ctx context.Context, queryRequest domain.Resou
 		OrderBy:        queryRequest.OrderBy,
 		ResourceType:   queryRequest.ResourceType,
 	}
-	res, err := s.client.MaskCustomerNumber(ctx, req)
+	res, err := s.client.Search(ctx, req)
 	if err != nil {
 		return []domain.Resource{}, err
 	}
@@ -33,6 +33,22 @@ func (s service) GetResourcesList(ctx context.Context, queryRequest domain.Resou
 	return mapResourcesResponse(res), nil
 }
 
-func mapResourcesResponse(res []youtube.ResourceListResponse) []domain.Resource {
-	return []domain.Resource{}
+func mapResourcesResponse(res *youtube.ResourceListResponse) []domain.Resource {
+	var list []domain.Resource
+	for _, e := range res.Data {
+		id := domain.ID{
+			Kind:    e.ID.Kind,
+			VideoID: e.ID.VideoID,
+		}
+
+		list = append(list, domain.Resource{
+			ID:          id,
+			Title:       e.Title,
+			Description: e.Description,
+			PublishedAt: e.PublishedAt,
+			ChannelId:   e.ChannelID,
+		})
+	}
+
+	return list
 }

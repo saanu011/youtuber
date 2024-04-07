@@ -13,6 +13,13 @@ type Resource struct {
 	PublishedAt time.Time  `json:"published_at"`
 	Thumbnails  Thumbnails `json:"thumbnails"`
 	Statistics  Statistics `json:"statistics"`
+	ID          ID         `json:"id"`
+	ChannelID   string     `json:"channelId"`
+}
+
+type ID struct {
+	Kind    string `json:"kind"`
+	VideoID string `json:"videoId"`
 }
 
 type Thumbnails struct {
