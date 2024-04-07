@@ -3,7 +3,6 @@ package worker
 import (
 	"fmt"
 	"time"
-	"youtuber/pkg/redis"
 
 	"github.com/hibiken/asynq"
 )
@@ -11,16 +10,20 @@ import (
 type Worker struct {
 	conf      Config
 	scheduler *asynq.Scheduler
+	server    *asynq.Server
+	handler   asynq.Handler
 }
 
-func New(conf Config, redis redis.Config) *Worker {
+func New(conf Config, router asynq.Handler) *Worker {
+	redisConnOpt := asynq.RedisClientOpt{Addr: conf.Redis.Addr}
+
 	loc, err := time.LoadLocation("Asia/Kolkata")
 	if err != nil {
 		fmt.Println("Unable to load load correct timezone for scheduler, defaulting to UTC %v", err)
 	}
 
 	scheduler := asynq.NewScheduler(
-		asynq.RedisClientOpt{Addr: conf.Redis.Addr},
+		redisConnOpt,
 		&asynq.SchedulerOpts{
 			Location: loc,
 		},
@@ -29,21 +32,44 @@ func New(conf Config, redis redis.Config) *Worker {
 	w := &Worker{
 		conf:      conf,
 		scheduler: scheduler,
+		handler:   router,
 	}
+
+	server := asynq.NewServer(redisConnOpt, asynq.Config{
+		Concurrency: conf.Concurrency,
+	})
+
+	w.server = server
 
 	return w
 }
 
-func (s *Worker) Start() error {
+func (w *Worker) Start() error {
+
+	go func() {
+		fmt.Println("Starting worker")
+
+		err := w.server.Run(w.handler)
+		if err != nil {
+			fmt.Println("Failed to start worker", err)
+		}
+	}()
 
 	go func() {
 		fmt.Println("Starting scheduler")
 
-		err := s.scheduler.Run()
+		err := w.scheduler.Run()
 		if err != nil {
-			fmt.Println("Failed to start scheduler %v", err)
+			fmt.Println("Failed to start scheduler", err)
 		}
 	}()
+
+	return nil
+}
+
+func (w *Worker) Shutdown() error {
+	fmt.Println("Shutting down worker")
+	w.server.Shutdown()
 
 	return nil
 }

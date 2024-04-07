@@ -8,9 +8,9 @@ import (
 )
 
 type Dependencies struct {
-	youtubeAPIClient youtube.APIResponder
-	resourceService  service.Service
-	redisClient      redis.Client
+	YoutubeAPIClient youtube.APIResponder
+	ResourceService  service.Service
+	RedisClient      redis.Client
 }
 
 func NewDependencies(conf *config.Config) (*Dependencies, error) {
@@ -23,8 +23,8 @@ func NewDependencies(conf *config.Config) (*Dependencies, error) {
 	resourceService := service.NewService(youtubeAPIClient)
 
 	return &Dependencies{
-		youtubeAPIClient: youtubeAPIClient,
-		resourceService:  resourceService,
-		redisClient:      redisClient,
+		YoutubeAPIClient: youtubeAPIClient,
+		ResourceService:  resourceService,
+		RedisClient:      redisClient,
 	}, nil
 }

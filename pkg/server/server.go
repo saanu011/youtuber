@@ -14,7 +14,7 @@ type Server struct {
 	conf Config
 }
 
-func NewServer(conf Config, handler http.Handler) *Server {
+func New(conf Config, handler http.Handler) *Server {
 	return &Server{
 		srv: &http.Server{
 			Handler:      handler,

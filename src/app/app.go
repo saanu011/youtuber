@@ -3,6 +3,7 @@ package app
 import (
 	"youtuber/pkg/server"
 	"youtuber/pkg/worker"
+	"youtuber/src/resource/job"
 
 	"youtuber/src/config"
 )
@@ -20,13 +21,16 @@ func NewApp(config *config.Config) (*App, error) {
 
 	router := NewRouter(config, deps)
 
-	httpServer := server.NewServer(config.Server, router)
+	httpServer := server.New(config.Server, router)
 
-	worker := worker.New(config.Worker, config.Redis)
+	workerRouter := NewWorkerRouter(config, deps)
+	work := worker.New(config.Worker, workerRouter)
+
+	addSchedulerTask(work)
 
 	app := &App{
 		Server: httpServer,
-		Worker: worker,
+		Worker: work,
 	}
 
 	return app, nil
@@ -43,6 +47,13 @@ func (a *App) Start() error {
 
 func (a *App) Shutdown() error {
 	err := a.Server.Shutdown()
+	if err != nil {
+		return err
+	}
+	return a.Worker.Shutdown()
+}
 
-	return err
+func addSchedulerTask(work *worker.Worker) {
+	task, _ := job.NewRefreshDataTask()
+	work.RegisterTask(task)
 }
